@@ -4,9 +4,14 @@
     "prepare": "nitropack prepare",
     "dev": "nitropack dev",
     "build": "nitropack build",
-    "preview": "node .output/server/index.mjs"
+    "preview": "node .output/server/index.mjs",
+    "clean": "rm -rf dist && rm -rf dist.zip",
+    "zip": "npm run build && cd dist/server && zip -r ../../dist.zip ./*"
   },
   "dependencies": {
-    "nitropack": "latest"
+    "nitropack": "latest",
+    "satori": "^0.10.9",
+    "satori-html": "^0.3.2",
+    "vue": "^3.3.7"
   }
 }
