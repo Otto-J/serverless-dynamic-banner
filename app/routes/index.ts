@@ -5,6 +5,9 @@ import fsPromise from "fs/promises";
 import fs from "fs";
 // import { createSSRApp } from "vue";
 import path from "path";
+// import font from "../public/DingTalkJinBuTi.ttf";
+
+const __dirname = path.dirname("");
 
 function hslToRgb(h: number, s: number, l: number) {
   // 将色调值转换为 0 到 1 之间的小数
@@ -56,9 +59,11 @@ function stringToDegrees(inputString: string) {
   return Math.abs(hash % 360);
 }
 
-function readImageAsBase64(filePath: string) {
+async function readImageAsBase64(filePath: string) {
   // 读取图片文件
   const imageBuffer = fs.readFileSync(filePath);
+  // const imageBuffer = await $fetch("/body.png");
+  // console.log("22", imageBuffer);
 
   // 将图片内容转换为 Base64 编码
   const base64String = imageBuffer.toString("base64");
@@ -111,20 +116,17 @@ export default eventHandler(async (e) => {
   const w = Number(_w || 600);
   const h = Number(_h || 250);
 
-  // const config = defaultModel();
-
   const mainColor = stringToDegrees(title);
 
   const [oneColor, secondColor] = linearGradientColor(mainColor);
 
-  console.log(title);
-
-  // const assets = useStorage("assets:server");
   const font = await fsPromise.readFile(
-    path.resolve("../assets/DingTalkJinBuTi.ttf")
+    path.resolve(__dirname, "./public/DingTalkJinBuTi.ttf")
   );
 
-  const boy = readImageAsBase64("../assets/boy.png");
+  const boyPath = path.relative(path.dirname("."), "./public/boy.png");
+
+  const boy = await readImageAsBase64(boyPath);
 
   const rect = {
     width: w,

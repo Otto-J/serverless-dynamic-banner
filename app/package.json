@@ -3,10 +3,10 @@
   "scripts": {
     "prepare": "nitropack prepare",
     "dev": "nitropack dev",
-    "build": "nitropack build",
+    "build": "nitropack build && cp ./scf_bootstrap dist/scf_bootstrap",
     "preview": "node .output/server/index.mjs",
     "clean": "rm -rf dist && rm -rf dist.zip",
-    "zip": "npm run build && cd dist/server && zip -r ../../dist.zip ./*"
+    "zip": "npm run build  &&  zip -r dist.zip dist"
   },
   "dependencies": {
     "nitropack": "latest",
