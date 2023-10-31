@@ -107,29 +107,31 @@ const linearGradientColor = (mainColorHub: number) => {
 };
 
 export default eventHandler(async (e) => {
-  const { title: _title, w: _w, h: _h } = getQuery(e);
-  const title = String(_title || "未设定 title 参数");
-  const w = Number(_w || 600);
-  const h = Number(_h || 250);
+  const { title = "未设定 title 参数", w = 600, h = 250, } = getQuery(e);
 
-  const mainColor = stringToDegrees(title);
+  const rect = {
+    width: Number(w),
+    height: Number(h)
+  };
+
+  const mainColor = stringToDegrees(String(title));
 
   const [oneColor, secondColor] = linearGradientColor(mainColor);
 
-  const font = await fsPromise.readFile(
-    path.resolve(__dirname, "./public/DingTalkJinBuTi.ttf")
-  );
+  const fontPath = path.resolve(__dirname, "./public/DingTalkJinBuTi.ttf")
+  const boyPath = path.relative(path.dirname("."), "./public/boy.png")
 
-  const boyPath = path.relative(path.dirname("."), "./public/boy.png");
 
-  const boy = await readImageAsBase64(boyPath);
+  const [font, boy] = await Promise.all([
+    fsPromise.readFile(fontPath),
+    readImageAsBase64(boyPath)
+  ])
 
-  const rect = {
-    width: w,
-    height: h,
-  };
+  setResponseHeaders(e, {
+    "Content-Type": "image/svg+xml",
+  });
 
-  const svg = await satori(
+  return satori(
     {
       type: "div",
       props: {
@@ -219,9 +221,4 @@ export default eventHandler(async (e) => {
       ],
     }
   );
-
-  setResponseHeaders(e, {
-    "Content-Type": "image/svg+xml",
-  });
-  return send(e, `${svg}`);
 });
