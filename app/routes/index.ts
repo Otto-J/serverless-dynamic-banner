@@ -2,7 +2,6 @@ import satori from "satori";
 // import { html } from "satori-html";
 // import { renderToString } from "vue/server-renderer";
 import fsPromise from "fs/promises";
-import fs from "fs";
 // import { createSSRApp } from "vue";
 import path from "path";
 // import font from "../public/DingTalkJinBuTi.ttf";
@@ -61,12 +60,9 @@ function stringToDegrees(inputString: string) {
 
 async function readImageAsBase64(filePath: string) {
   // 读取图片文件
-  const imageBuffer = fs.readFileSync(filePath);
-  // const imageBuffer = await $fetch("/body.png");
-  // console.log("22", imageBuffer);
-
-  // 将图片内容转换为 Base64 编码
-  const base64String = imageBuffer.toString("base64");
+  const base64String = await fsPromise.readFile(filePath, {
+    encoding: 'base64'
+  });
 
   // 拼接 Base64 数据 URL
   const mimeType = path.extname(filePath).replace(".", "");
@@ -111,29 +107,31 @@ const linearGradientColor = (mainColorHub: number) => {
 };
 
 export default eventHandler(async (e) => {
-  const { title: _title, w: _w, h: _h } = getQuery(e);
-  const title = String(_title || "未设定 title 参数");
-  const w = Number(_w || 600);
-  const h = Number(_h || 250);
+  const { title = "未设定 title 参数", w = 600, h = 250, } = getQuery(e);
 
-  const mainColor = stringToDegrees(title);
+  const rect = {
+    width: Number(w),
+    height: Number(h)
+  };
+
+  const mainColor = stringToDegrees(String(title));
 
   const [oneColor, secondColor] = linearGradientColor(mainColor);
 
-  const font = await fsPromise.readFile(
-    path.resolve(__dirname, "./public/DingTalkJinBuTi.ttf")
-  );
+  const fontPath = path.resolve(__dirname, "./public/DingTalkJinBuTi.ttf")
+  const boyPath = path.relative(path.dirname("."), "./public/boy.png")
 
-  const boyPath = path.relative(path.dirname("."), "./public/boy.png");
 
-  const boy = await readImageAsBase64(boyPath);
+  const [font, boy] = await Promise.all([
+    fsPromise.readFile(fontPath),
+    readImageAsBase64(boyPath)
+  ])
 
-  const rect = {
-    width: w,
-    height: h,
-  };
+  setResponseHeaders(e, {
+    "Content-Type": "image/svg+xml",
+  });
 
-  const svg = await satori(
+  return satori(
     {
       type: "div",
       props: {
@@ -223,11 +221,4 @@ export default eventHandler(async (e) => {
       ],
     }
   );
-
-  setResponseHeaders(e, {
-    "Content-Type": "image/svg+xml",
-    // tag
-    "Cache-Control": "max-age=31536000",
-  });
-  return send(e, `${svg}`);
 });
