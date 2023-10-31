@@ -2,7 +2,6 @@ import satori from "satori";
 // import { html } from "satori-html";
 // import { renderToString } from "vue/server-renderer";
 import fsPromise from "fs/promises";
-import fs from "fs";
 // import { createSSRApp } from "vue";
 import path from "path";
 // import font from "../public/DingTalkJinBuTi.ttf";
@@ -61,12 +60,9 @@ function stringToDegrees(inputString: string) {
 
 async function readImageAsBase64(filePath: string) {
   // 读取图片文件
-  const imageBuffer = fs.readFileSync(filePath);
-  // const imageBuffer = await $fetch("/body.png");
-  // console.log("22", imageBuffer);
-
-  // 将图片内容转换为 Base64 编码
-  const base64String = imageBuffer.toString("base64");
+  const base64String = await fsPromise.readFile(filePath, {
+    encoding: 'base64'
+  });
 
   // 拼接 Base64 数据 URL
   const mimeType = path.extname(filePath).replace(".", "");
@@ -226,8 +222,6 @@ export default eventHandler(async (e) => {
 
   setResponseHeaders(e, {
     "Content-Type": "image/svg+xml",
-    // tag
-    "Cache-Control": "max-age=31536000",
   });
   return send(e, `${svg}`);
 });

@@ -1,3 +1,5 @@
+const YEAR = 31536000
+
 //https://nitro.unjs.io/config
 export default defineNitroConfig({
   output: {
@@ -12,4 +14,10 @@ export default defineNitroConfig({
       dir: "./myAssets",
     },
   ],
+  compressPublicAssets: true,
+  routeRules: {
+    '/': {
+      swr: YEAR
+    }
+  }
 });
